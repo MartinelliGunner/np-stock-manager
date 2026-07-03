@@ -16,7 +16,11 @@ API_KEY = os.environ.get(
     "90c75586a6be263747e11de4342d38a79846030632bfc887bc7710291b9efb22b065cd1eaa2f947fd0ba8597d37c2a1ab7acb3d69f24a7e272ec81845999bede"
 )
 BASE_URL = "https://marketplace-api.takealot.com/v1"
-HEADERS = {"X-API-Key": API_KEY}
+HEADERS = {
+    "X-API-Key": API_KEY,
+    "User-Agent": "NP-Stock-Manager/1.0",
+    "Accept": "application/json",
+}
 
 
 def fetch_all(endpoint, extra_params=None, retries=3):
@@ -35,7 +39,8 @@ def fetch_all(endpoint, extra_params=None, retries=3):
                 if resp.status_code >= 500 and attempt < retries - 1:
                     time.sleep(2 ** attempt)
                     continue
-                resp.raise_for_status()
+                if not resp.ok:
+                    raise Exception(f"{resp.status_code} {resp.reason}: {resp.text[:500]}")
             except requests.exceptions.Timeout:
                 if attempt < retries - 1:
                     time.sleep(2 ** attempt)
