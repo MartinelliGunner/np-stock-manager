@@ -10,6 +10,9 @@ from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
+# Railway uses postgres:// but psycopg2 requires postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 
 def get_db():
