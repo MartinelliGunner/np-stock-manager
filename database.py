@@ -5,19 +5,18 @@ All tables prefixed with np_ to avoid conflicts in shared Postgres.
 """
 
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row
 from datetime import datetime, timedelta
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-# Railway uses postgres:// but psycopg2 requires postgresql://
+# Railway uses postgres:// but psycopg requires postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-    conn.autocommit = False
+    conn = psycopg.connect(DATABASE_URL, row_factory=dict_row, autocommit=False)
     return conn
 
 
