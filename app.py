@@ -306,7 +306,9 @@ async def submit_bulk_stocktake(bulk_data: str = Form(...)):
                 qty = int(parts[1])
             except ValueError:
                 continue
-            row = conn.execute("SELECT id FROM products WHERE sku = ?", (sku,)).fetchone()
+            cur = conn.cursor()
+            cur.execute("SELECT id FROM np_products WHERE sku = %s", (sku,))
+            row = cur.fetchone()
             if row:
                 record_stock_count(row["id"], qty)
                 count += 1
@@ -421,10 +423,12 @@ async def create_order(
             cost_kg = float(parts[3]) if len(parts) > 3 else 0
 
             # Try to match product
-            row = conn.execute(
-                "SELECT id FROM products WHERE title LIKE ? OR sku LIKE ? LIMIT 1",
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT id FROM np_products WHERE title ILIKE %s OR sku ILIKE %s LIMIT 1",
                 (f"%{name}%", f"%{name}%")
-            ).fetchone()
+            )
+            row = cur.fetchone()
             pid = row["id"] if row else None
 
             items.append({
